@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191213151620) do
+ActiveRecord::Schema.define(version: 20191230103921) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -261,8 +261,8 @@ ActiveRecord::Schema.define(version: 20191213151620) do
     t.uuid "facility_group_id"
     t.string "slug"
     t.string "zone"
-    t.string "facility_size"
     t.boolean "enable_diabetes_management", default: false, null: false
+    t.string "facility_size"
     t.index ["deleted_at"], name: "index_facilities_on_deleted_at"
     t.index ["enable_diabetes_management"], name: "index_facilities_on_enable_diabetes_management"
     t.index ["facility_group_id"], name: "index_facilities_on_facility_group_id"
@@ -713,5 +713,18 @@ ActiveRecord::Schema.define(version: 20191213151620) do
       facilities,
       users
     WHERE ((blood_pressures.patient_id = patients.id) AND (blood_pressures.facility_id = facilities.id) AND (blood_pressures.user_id = users.id));
+  SQL
+  create_view "latest_blood_pressures_per_patient_per_months", materialized: true, sql_definition: <<-SQL
+      SELECT DISTINCT ON (blood_pressures.patient_id, (date_part('year'::text, blood_pressures.recorded_at)), (date_part('month'::text, blood_pressures.recorded_at))) blood_pressures.id,
+      blood_pressures.patient_id,
+      blood_pressures.facility_id,
+      blood_pressures.recorded_at,
+      blood_pressures.systolic,
+      blood_pressures.diastolic,
+      date_part('month'::text, blood_pressures.recorded_at) AS month,
+      date_part('quarter'::text, blood_pressures.recorded_at) AS quarter,
+      date_part('year'::text, blood_pressures.recorded_at) AS year
+     FROM blood_pressures
+    ORDER BY blood_pressures.patient_id, (date_part('year'::text, blood_pressures.recorded_at)), (date_part('month'::text, blood_pressures.recorded_at)), blood_pressures.recorded_at DESC, blood_pressures.id;
   SQL
 end
