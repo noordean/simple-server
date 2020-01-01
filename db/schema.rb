@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191230115309) do
+ActiveRecord::Schema.define(version: 20200101130328) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -737,5 +737,16 @@ ActiveRecord::Schema.define(version: 20191230115309) do
       latest_blood_pressures_per_patient_per_months.year
      FROM latest_blood_pressures_per_patient_per_months
     ORDER BY latest_blood_pressures_per_patient_per_months.patient_id, latest_blood_pressures_per_patient_per_months.year, latest_blood_pressures_per_patient_per_months.quarter, latest_blood_pressures_per_patient_per_months.recorded_at DESC, latest_blood_pressures_per_patient_per_months.id;
+  SQL
+  create_view "visited_patients_with_controlled_bp_quarterlies", materialized: true, sql_definition: <<-SQL
+      SELECT blood_pressures.facility_id,
+      blood_pressures.quarter,
+      blood_pressures.year,
+      count(*) AS count
+     FROM (latest_blood_pressures_per_patient_per_quarters blood_pressures
+       JOIN patients ON ((patients.id = blood_pressures.patient_id)))
+    WHERE ((patients.deleted_at IS NULL) AND ((blood_pressures.systolic < 140) AND (blood_pressures.diastolic < 90)) AND (date_trunc('quarter'::text, blood_pressures.recorded_at) = (date_trunc('quarter'::text, patients.recorded_at) + '3 mons'::interval)))
+    GROUP BY blood_pressures.facility_id, blood_pressures.quarter, blood_pressures.year
+    ORDER BY blood_pressures.year, blood_pressures.quarter;
   SQL
 end
