@@ -1,3 +1,4 @@
+require "codeclimate-test-reporter"
 require 'simplecov'
 require 'utils'
 require 'webmock/rspec'
@@ -9,6 +10,7 @@ require 'webdrivers'
 WebMock.allow_net_connect!
 
 RSpec.configure do |config|
+  CodeClimate::TestReporter.start
   SimpleCov.start
 
   config.expect_with :rspec do |expectations|

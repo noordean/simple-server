@@ -86,6 +86,7 @@ group :test do
   gem 'puma'
   gem 'webdrivers'
   gem 'rspec-sidekiq'
+  gem "codeclimate-test-reporter", require: false
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
