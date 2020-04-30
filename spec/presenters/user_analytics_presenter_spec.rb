@@ -59,21 +59,21 @@ RSpec.describe UserAnalyticsPresenter, type: :model do
 
         expected_output = {
           registrations: {
-            (Date.today - 5) => 0,
-            (Date.today - 4) => 0,
-            (Date.today - 3) => 0,
-            (Date.today - 2) => 0,
-            (Date.today - 1) => 0,
-            Date.today => 0
+            (Date.current - 5) => 0,
+            (Date.current - 4) => 0,
+            (Date.current - 3) => 0,
+            (Date.current - 2) => 0,
+            (Date.current - 1) => 0,
+            Date.current => 0
           },
 
           follow_ups: {
-            (Date.today - 5) => 0,
-            (Date.today - 4) => 0,
-            (Date.today - 3) => 0,
-            (Date.today - 2) => 0,
-            (Date.today - 1) => 0,
-            Date.today => 0,
+            (Date.current - 5) => 0,
+            (Date.current - 4) => 0,
+            (Date.current - 3) => 0,
+            (Date.current - 2) => 0,
+            (Date.current - 1) => 0,
+            Date.current => 0,
           }
         }
 
@@ -289,20 +289,22 @@ RSpec.describe UserAnalyticsPresenter, type: :model do
         #
         # create BPs (follow-ups)
         #
-        patients = create_list(:patient, 3, registration_facility: current_facility)
+        patients = create_list(:patient,
+                               3,
+                               registration_facility: current_facility)
+
         patients.each do |patient|
           [patient.recorded_at + 1.month,
            patient.recorded_at + 2.months,
            patient.recorded_at + 3.months,
            patient.recorded_at + 4.months].each do |date|
-            travel_to(date) do
-              create(:encounter,
-                     :with_observables,
-                     observable: create(:blood_pressure,
-                                        patient: patient,
-                                        facility: current_facility,
-                                        user: current_user))
-            end
+            create(:encounter,
+                   :with_observables,
+                   observable: create(:blood_pressure,
+                                      patient: patient,
+                                      facility: current_facility,
+                                      user: current_user,
+                                      recorded_at: date))
           end
         end
 

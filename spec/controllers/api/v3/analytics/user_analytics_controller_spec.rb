@@ -62,11 +62,18 @@ RSpec.describe Api::V3::Analytics::UserAnalyticsController, type: :controller do
         end
 
         context 'achievements' do
+          let(:request_date) { Date.new(2018, 4, 8) }
+
           it 'has the section visible' do
             #
             # create BPs (follow-ups)
             #
-            patients = create_list(:patient, 3, registration_facility: request_facility)
+
+            patients = create_list(:patient,
+                                   3,
+                                   registration_facility: request_facility,
+                                   recorded_at: request_date)
+
             patients.each do |patient|
               [patient.recorded_at + 1.month,
                patient.recorded_at + 2.months,
@@ -148,11 +155,15 @@ RSpec.describe Api::V3::Analytics::UserAnalyticsController, type: :controller do
 
         describe 'facility has patients registered' do
           let(:months) { (1..6).map { |month| Date.new(2019, month, 1) } }
+
           let!(:patients) do
             patients = []
             months.each do |week|
-              Timecop.scale(1.day, week) { patients << create_list(:patient, 2, registration_facility: request_facility) }
+              Timecop.scale(1.day, week) { patients << create_list(:patient,
+                                                                   2,
+                                                                   registration_facility: request_facility) }
             end
+
             patients.flatten
           end
 
